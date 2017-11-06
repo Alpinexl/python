@@ -16,7 +16,6 @@ from requests.auth import HTTPBasicAuth
 import json
 from configparser import ConfigParser
 from pathlib import Path
-import sys
 import datetime
 
 scriptname = Path(sys.argv[0])
@@ -47,6 +46,7 @@ def write_to_log(message):
         datum = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         file.write(datum + ' ' + message + '\n')
 
+
 def sendmail(mailserver, fromaddr, toaddr, subject, msg):
     msg = 'From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s' % (fromaddr, toaddr, subject, msg)
     try:
@@ -56,6 +56,8 @@ def sendmail(mailserver, fromaddr, toaddr, subject, msg):
         server.quit()
     except:
         write_to_log('Unable to send email using SMTP server: ' + mailserver)
+
+
 try:
     response = requests.get(b2bi_url, auth=HTTPBasicAuth(b2bi_username, b2bi_passwd))
 except:
