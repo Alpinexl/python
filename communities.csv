@@ -1,0 +1,3 @@
+name,partyname,email,phone,note,title,enabled,routingidtype,routingid
+COM1,COM1,info@interchange.com,0621802120,note,title,true,type,ZZCOM1
+COM2,COM2,info@interchange.com,0621802120,note,thisisatitle,true,thisisatype,ZZCOM2

@@ -1,0 +1,11 @@
+name,partyname,email,phone,note,title,enabled,routingidtype,routingid,communitymembership
+Interchange,Interchange,info@interchange.com,0621802120,note,title,true,type,ZZInterchange,COM1
+Interchange2,Interchange2,info@interchange.com,0621802120,note,title,true,type,ZZInterchange2,COM2
+Interchange3,Interchange3,info@interchange.com,0621802120,note,title,true,type,ZZInterchange3,COM1
+Interchange4,Interchange4,info@interchange.com,0621802120,note,title,true,type,ZZInterchange4,COM2
+Interchange5,Interchange5,info@interchange.com,0621802120,note,title,true,type,ZZInterchange5,COM1
+Interchange6,Interchange6,info@interchange.com,0621802120,note,title,true,type,ZZInterchange6,COM2
+Interchange7,Interchange7,info@interchange.com,0621802120,note,title,true,type,ZZInterchange7,COM1
+Interchange8,Interchange8,info@interchange.com,0621802120,note,title,true,type,ZZInterchange8,COM2
+Interchange9,Interchange9,info@interchange.com,0621802120,note,title,true,type,ZZInterchange9,COM1
+Interchange10,Interchange10,info@interchange.com,0621802120,note,title,true,type,ZZInterchange10,COM2
