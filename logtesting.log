@@ -1,0 +1,14 @@
+2017-11-04 18:49:28,594 CRITICAL critical regel
+2017-11-04 18:49:28,594 ERROR error regel
+2017-11-04 18:49:43,417 CRITICAL critical regel
+2017-11-04 18:50:22,755 WARNING warning regel
+2017-11-04 18:50:22,755 ERROR error regel
+2017-11-04 18:50:22,755 CRITICAL critical regel
+2017-11-04 18:50:38,405 INFO hallo dit is een logregel
+2017-11-04 18:50:38,405 WARNING warning regel
+2017-11-04 18:50:38,405 ERROR error regel
+2017-11-04 18:50:38,405 CRITICAL critical regel
+2017-11-04 18:51:05,322 INFO hallo dit is een logregel
+2017-11-04 18:51:05,326 WARNING warning regel
+2017-11-04 18:51:05,326 ERROR error regel
+2017-11-04 18:51:05,326 CRITICAL critical regel
