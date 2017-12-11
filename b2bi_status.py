@@ -1,12 +1,16 @@
 ####################################################
 #
 # Author: Robert van Gangelen, Axway BV
-# Version: 0.1
+# Version: 0.2
 # Creation date: 24-10-2017	
 # 	
-# Run like: python b2bi_status.py <hostname>
-#      example: python b2bi_status.py l1161o0003.cicapp.nl	
-#
+# Run like: python b2bi_status.py
+#      example: python b2bi_status.py	
+# 
+#  When program execution fails it returns exit code 1
+#  Program uses ini file for the basic configuration
+#  Program uses log file for execution information
+#  Log file is located in the same directory as the py file
 ####################################################
 
 import requests
@@ -17,10 +21,14 @@ import json
 from configparser import ConfigParser
 from pathlib import Path
 import datetime
+import logging
+
+# set the logging
+logging.basicConfig(filename='b2bi_status.log',level=logging.DEBUG, 
+    format='%(asctime)s %(levelname)s %(message)s')
 
 scriptname = Path(sys.argv[0])
 inifilename = scriptname.with_suffix('')
-logfilename = scriptname.with_suffix('')
 config = ConfigParser()
 config.read(str(inifilename) + '.ini')
 systemnode_status = {}
@@ -37,54 +45,59 @@ try:
     fromaddr = config['Mail']['from_addres']
     toaddr = config['Mail']['to_addres']
 except KeyError as e:
-    print('Unable to find key ' + str(e) + ' ' 'in ini file')
+    logging.error('Unable to find key {} in ini file'.format (str(e)))
+    sys.exit(1)
 
 b2bi_url = b2bi_server + ':' + b2bi_port + b2bi_api_url
 
-def write_to_log(message):
-    with open(str(logfilename) + '.log', 'a') as file:
-        datum = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        file.write(datum + ' ' + message + '\n')
-
+# if logging is set to DEBUG mode print out the following information for debug purposes
+logging.debug('inifilename = {}'.format(inifilename))
+logging.debug('logfilename = {}'.format(inifilename))
+logging.debug('b2bi_server = {}'.format(b2bi_server))
+logging.debug('b2bi_port = {}'.format(b2bi_port))
+logging.debug('b2bi_url = {}'.format(smtp_server))
+logging.debug('b2bi_username = {}'.format(b2bi_username))
+logging.debug('b2bi_passwd = {}'.format(b2bi_passwd))
+logging.debug('smtp_server = {}'.format(smtp_server))
+logging.debug('fromaddr = {}'.format(fromaddr))
+logging.debug('toaddr = {}'.format(toaddr))
 
 def sendmail(mailserver, fromaddr, toaddr, subject, msg):
-    msg = 'From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s' % (fromaddr, toaddr, subject, msg)
+    msg = 'From: {}\r\nTo: {}\r\nSubject: {}\r\n\r\n{}'.format(fromaddr, toaddr, subject, msg)
     try:
-        print(msg)
         server = smtplib.SMTP(mailserver)
         server.sendmail(fromaddr, toaddr, msg)
         server.quit()
     except:
-        write_to_log('Unable to send email using SMTP server: ' + mailserver)
+        logging.error('Unable to send email using SMTP server: {}'.format (mailserver))
 
 
 try:
     response = requests.get(b2bi_url, auth=HTTPBasicAuth(b2bi_username, b2bi_passwd))
-except:
+except requests.exceptions.RequestException as e:
     # problems with connecting to the b2bi server and REST API call. Send an email and stop the program with exit code 1
-    write_to_log('Unable to execute REST API on ' + b2bi_url + '. B2Bi Server not running')
-    sendmail(smtp_server, fromaddr, toaddr, 'B2Bi REST API call failed',
-             'Unable to execute REST API on ' + b2bi_url + '. B2Bi Server not running')
+    logging.error('Unable to execute REST API on {}. B2Bi Server not running'.format(b2bi_url))
+    sendmail(smtp_server, fromaddr, toaddr, 'B2Bi REST API call failed on server {}'.format(b2bi_server),
+             'Unable to execute REST API on {}. B2Bi server not running'.format(b2bi_url))
     sys.exit(1)
 else:
     # no problem with the connection lets check the http response code
-    if response.status_code != 200:
-        # http response code is not equal to 200. Send an email and stop the program with exit code 1
-        print(response.status_code)
-        subject= 'B2Bi REST API call failed on server ' + b2bi_url + ' due to HTTP response code: ' + str(response.status_code)
-        message = 'Unable to execute REST API on ' + b2bi_url + '. Check if the user has the rights to execute the B2Bi REST APIs or the view system status priveleges.'
-        sendmail(smtp_server, fromaddr, toaddr, subject,message)
-        write_to_log(message)
-        sys.exit(1)
-    else:
+    if response.status_code == 200:
         # load the response message into a json object
         resp_payload = json.loads(str(response.text))
+    else:
+        # http response code is not equal to 200. Send an email and stop the program with exit code 1
+        subject= 'B2Bi REST API call failed on server {} due to HTTP response code: {}'.format(b2bi_url, str(response.status_code))
+        message= 'Unable to execute REST API on {}. Check if the user has the rights to execute the B2Bi REST APIs or the view system status priveleges.'.format(b2bi_url)
+        sendmail(smtp_server, fromaddr, toaddr, subject, message)
+        logging.error(message)
+        sys.exit(1)
 
-    # create a dictionary (key, value hashmap) of the type and status fields
+    # loop throug the json object and create a dictionary (key, value hashmap) of the type and status fields
     for item in resp_payload:
         systemnode_status[item['type']] = item['status']
 
-    # loop through the hashmap and do a check on the key value pairs
+    # loop through the systemnode_status dictionary and do a check on the key value pairs
     for k, v in systemnode_status.items():
         if (k == 'CN') or (k == 'TE') or (k == 'B2B'):
             if v.lower() != 'running':
@@ -95,11 +108,11 @@ else:
                 email = True
 
     if email:
-        message='B2Bi System nodes on ' + b2bi_url + ' not running'
+        message='B2Bi System nodes on {} not running'.format (b2bi_url)
         sendmail(smtp_server, fromaddr, toaddr, message,
                  str(systemnode_status))
-        write_to_log(message)
+        logging.error(message)
         sys.exit(1)
     else:
-        write_to_log('B2Bi nodes are running!')
+        logging.info('B2Bi nodes are running!')
         sys.exit(0)

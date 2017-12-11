@@ -7,7 +7,7 @@
 # Run like: python delete_partners.py
 #      example: python delete_partners.py
 # 
-# Program is using a ini file. With the same name as 
+# Program is using a ini file with the same name as 
 # the script in the same directory.
 # A log file is create with the same name as the program
 #
